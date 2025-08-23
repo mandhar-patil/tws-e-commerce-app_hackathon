@@ -38,4 +38,38 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Command to run the application
+CMD ["node", "server.js"]# Stage 1: Build Stage
+FROM node:18-bullseye AS build
+
+WORKDIR /app
+
+# Install deps
+RUN apt-get update && apt-get install -y python3 make g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
+
+# Stage 2: Production Stage
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Copy build artifacts from Debian build
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/public ./public
+
+# Environment
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
 CMD ["node", "server.js"]
+
