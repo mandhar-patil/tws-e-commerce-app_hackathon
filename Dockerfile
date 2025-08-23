@@ -5,12 +5,6 @@ FROM node:18-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-
-# Install deps
-RUN apt-get update && apt-get install -y python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-
 # Install necessary build dependencies
 RUN apk add --no-cache python3 make g++
 
